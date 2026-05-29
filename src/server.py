@@ -10,6 +10,10 @@ Connect from Claude Desktop by adding this server to your claude_desktop_config.
 
 from fastmcp import FastMCP
 from src.tools.cost import get_cost_summary
+from src.tools.glue import find_glue_failures
+from src.tools.stepfunctions import find_sfn_failures
+from src.tools.s3 import find_untagged_s3_buckets
+from src.tools.health_report import generate_dataops_health_report
 
 mcp = FastMCP(
     name="dataops-health-mcp",
@@ -32,29 +36,42 @@ def get_cost_summary_tool() -> dict:
     return get_cost_summary()
 
 
-# TODO: register find_glue_failures when tools/glue.py is implemented
-# @mcp.tool()
-# def find_glue_failures_tool() -> dict:
-#     from src.tools.glue import find_glue_failures
-#     return find_glue_failures()
+@mcp.tool()
+def find_glue_failures_tool() -> dict:
+    """
+    Returns failed AWS Glue job runs in the last 24 hours.
+    Shows job name, run ID, error message, and how long the job ran before failing.
+    Currently runs in mock mode — no real AWS calls are made.
+    """
+    return find_glue_failures()
 
-# TODO: register find_sfn_failures when tools/stepfunctions.py is implemented
-# @mcp.tool()
-# def find_sfn_failures_tool() -> dict:
-#     from src.tools.stepfunctions import find_sfn_failures
-#     return find_sfn_failures()
+@mcp.tool()
+def find_sfn_failures_tool() -> dict:
+    """
+    Returns failed AWS Step Functions executions in the last 24 hours.
+    Shows state machine name, execution name, error type, and failure cause.
+    Currently runs in mock mode — no real AWS calls are made.
+    """
+    return find_sfn_failures()
 
-# TODO: register find_untagged_s3_buckets when tools/s3.py is implemented
-# @mcp.tool()
-# def find_untagged_s3_buckets_tool() -> dict:
-#     from src.tools.s3 import find_untagged_s3_buckets
-#     return find_untagged_s3_buckets()
 
-# TODO: register generate_dataops_health_report last (depends on all tools above)
-# @mcp.tool()
-# def generate_dataops_health_report_tool() -> dict:
-#     from src.tools.health_report import generate_dataops_health_report
-#     return generate_dataops_health_report()
+@mcp.tool()
+def find_untagged_s3_buckets_tool() -> dict:
+    """
+    Returns S3 buckets missing required tags (team, env, project).
+    Shows bucket name, which tags are missing, and which tags exist.
+    Currently runs in mock mode — no real AWS calls are made.
+    """
+    return find_untagged_s3_buckets()
+
+@mcp.tool()
+def generate_dataops_health_report_tool() -> dict:
+    """
+    Generates a full DataOps health report combining cost, Glue failures,
+    Step Functions failures, and untagged S3 buckets into a single summary.
+    Currently runs in mock mode — no real AWS calls are made.
+    """
+    return generate_dataops_health_report()
 
 
 if __name__ == "__main__":
