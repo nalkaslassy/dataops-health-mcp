@@ -9,17 +9,17 @@ Ask Claude questions like:
 
 ---
 
-## Current Status: Phase 1 — Template + one mock tool
+## Current Status: Phase 1 complete — all 5 tools mocked
 
-> **Warning:** Real AWS mode is NOT implemented yet. Everything runs on mock data.
+> **Note:** Real AWS mode is not yet implemented. All tools run on mock data. Live mode coming in Phase 2.
 
-| Tool | Status |
-|---|---|
-| `get_cost_summary` | Mock working |
-| `find_glue_failures` | Not yet implemented |
-| `find_sfn_failures` | Not yet implemented |
-| `find_untagged_s3_buckets` | Not yet implemented |
-| `generate_dataops_health_report` | Not yet implemented |
+| Tool | Mock | Live AWS |
+|---|---|---|
+| `get_cost_summary` | Done | TODO |
+| `find_glue_failures` | Done | TODO |
+| `find_sfn_failures` | Done | TODO |
+| `find_untagged_s3_buckets` | Done | TODO |
+| `generate_dataops_health_report` | Done | TODO |
 
 ---
 
@@ -101,10 +101,10 @@ examples/
 
 ---
 
-## Coming Next
+## Coming Next (Phase 2 — Live AWS mode)
 
-1. `find_glue_failures` — Glue job run history
-2. `find_sfn_failures` — Step Functions execution history
-3. `find_untagged_s3_buckets` — S3 tag audit
-4. `generate_dataops_health_report` — combined report from all tools
-5. Live AWS mode — real boto3 calls behind `DATAOPS_MODE=live`
+1. `get_cost_summary` — real Cost Explorer API calls
+2. `find_glue_failures` — real Glue job run history
+3. `find_sfn_failures` — real Step Functions execution history
+4. `find_untagged_s3_buckets` — real S3 tag audit
+5. `generate_dataops_health_report` — automatically live once all tools above are done
