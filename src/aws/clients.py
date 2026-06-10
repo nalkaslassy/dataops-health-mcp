@@ -16,3 +16,7 @@ def is_mock() -> bool:
 
 def get_cost_explorer_client():
     return boto3.client("ce", region_name="us-east-1")
+
+
+def get_glue_client():
+    return boto3.client("glue", region_name="us-east-1")
