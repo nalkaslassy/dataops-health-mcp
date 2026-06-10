@@ -20,3 +20,7 @@ def get_cost_explorer_client():
 
 def get_glue_client():
     return boto3.client("glue", region_name="us-east-1")
+
+
+def get_sfn_client():
+    return boto3.client("stepfunctions", region_name="us-east-1")
