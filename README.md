@@ -1,25 +1,33 @@
 # dataops-health-mcp
 
-Local-first MCP server for DataOps health monitoring on AWS.
+Local MCP server that connects Claude to your AWS account for DataOps health monitoring.
 
 Ask Claude questions like:
 - *"What are my top AWS costs this month?"*
 - *"Which Glue jobs failed in the last 24 hours?"*
-- *"Generate a full DataOps health report."*
+- *"Are any of my S3 buckets missing tags?"*
+- *"Give me a full DataOps health report."*
 
 ---
 
-## Current Status: Phase 1 complete — all 5 tools mocked
-
-> **Note:** Real AWS mode is not yet implemented. All tools run on mock data. Live mode coming in Phase 2.
+## Current Status: Phase 2 complete — all 5 tools live
 
 | Tool | Mock | Live AWS |
 |---|---|---|
-| `get_cost_summary` | Done | TODO |
-| `find_glue_failures` | Done | TODO |
-| `find_sfn_failures` | Done | TODO |
-| `find_untagged_s3_buckets` | Done | TODO |
-| `generate_dataops_health_report` | Done | TODO |
+| `get_cost_summary` | Done | Done |
+| `find_glue_failures` | Done | Done |
+| `find_sfn_failures` | Done | Done |
+| `find_untagged_s3_buckets` | Done | Done |
+| `generate_dataops_health_report` | Done | Done |
+
+---
+
+## How it works
+
+This is an MCP server — a plugin for Claude Desktop. Instead of copying and pasting AWS data into Claude, Claude calls this server directly and gets the data itself.
+
+Set `DATAOPS_MODE=mock` to use fake data (no AWS credentials needed).  
+Set `DATAOPS_MODE=live` to use your real AWS account.
 
 ---
 
@@ -34,16 +42,6 @@ pip install -r requirements.txt
 copy .env.example .env          # Windows
 # cp .env.example .env          # macOS / Linux
 ```
-
----
-
-## Run in Mock Mode
-
-```bash
-python -m src.server
-```
-
-No AWS credentials needed — mock mode uses example data only.
 
 ---
 
@@ -65,14 +63,25 @@ Add this to your `claude_desktop_config.json`:
     "dataops-health-mcp": {
       "command": "python",
       "args": ["-m", "src.server"],
-      "cwd": "/absolute/path/to/dataops-health-mcp",
-      "env": { "DATAOPS_MODE": "mock" }
+      "cwd": "C:/Users/your-username/path/to/dataops-health-mcp",
+      "env": { "DATAOPS_MODE": "live" }
     }
   }
 }
 ```
 
-Then try: *"Give me a cost summary for this billing period."*
+---
+
+## AWS Permissions Required
+
+Your AWS user needs the following policies:
+
+| Policy | Used by |
+|---|---|
+| `AWSBillingReadOnlyAccess` | `get_cost_summary` |
+| `AWSGlueConsoleFullAccess` | `find_glue_failures` |
+| `AWSStepFunctionsReadOnlyAccess` | `find_sfn_failures` |
+| `AmazonS3ReadOnlyAccess` | `find_untagged_s3_buckets` |
 
 ---
 
@@ -80,31 +89,33 @@ Then try: *"Give me a cost summary for this billing period."*
 
 ```
 src/
-  server.py               # MCP entry point — tool registration lives here
+  server.py               # MCP entry point — tool registration
   tools/
-    cost.py               # get_cost_summary (mock done, live TODO)
-    glue.py               # find_glue_failures (TODO)
-    stepfunctions.py      # find_sfn_failures (TODO)
-    s3.py                 # find_untagged_s3_buckets (TODO)
-    health_report.py      # generate_dataops_health_report (TODO, last)
+    cost.py               # get_cost_summary
+    glue.py               # find_glue_failures
+    stepfunctions.py      # find_sfn_failures
+    s3.py                 # find_untagged_s3_buckets
+    health_report.py      # generate_dataops_health_report (calls all 4 above)
   mock/
-    mock_data.py          # Realistic fake AWS data for development
+    mock_data.py          # Fake AWS data for mock mode
   schemas/
     outputs.py            # Pydantic models for tool return values
   aws/
-    clients.py            # boto3 client factory stub (live mode TODO)
+    clients.py            # boto3 client factory + mock/live mode switch
 tests/
-  test_cost_mock.py       # pytest tests for get_cost_summary
+  test_cost_mock.py
+  test_glue_mock.py
+  test_sfn_mock.py
+  test_s3_mock.py
+  test_health_report_mock.py
 examples/
-  sample_prompts.md       # Example prompts to try in Claude Desktop
+  sample_prompts.md
 ```
 
 ---
 
-## Coming Next (Phase 2 — Live AWS mode)
+## Coming Next (Phase 3)
 
-1. `get_cost_summary` — real Cost Explorer API calls
-2. `find_glue_failures` — real Glue job run history
-3. `find_sfn_failures` — real Step Functions execution history
-4. `find_untagged_s3_buckets` — real S3 tag audit
-5. `generate_dataops_health_report` — automatically live once all tools above are done
+- Connect to Claude Desktop and test end-to-end
+- Add tagging support — tag S3 buckets directly from Claude
+- Slack/email alerting for critical failures
