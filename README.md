@@ -45,6 +45,38 @@ copy .env.example .env          # Windows
 
 ---
 
+## AWS Credentials Setup (for `DATAOPS_MODE=live`)
+
+If you only want mock mode, skip this section.
+
+For live mode, configure AWS credentials on your machine first:
+
+```bash
+aws configure --profile default
+```
+
+You will be prompted for:
+- AWS Access Key ID
+- AWS Secret Access Key
+- Default region name (for example `us-east-1`)
+- Default output format (for example `json`)
+
+Then set your `.env` values:
+
+```bash
+DATAOPS_MODE=live
+AWS_PROFILE=default
+AWS_REGION=us-east-1
+```
+
+If you use AWS SSO, log in before starting Claude Desktop:
+
+```bash
+aws sso login --profile default
+```
+
+---
+
 ## Run Tests
 
 ```bash
